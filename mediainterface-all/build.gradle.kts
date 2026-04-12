@@ -63,10 +63,18 @@ afterEvaluate {
                     .forEach { artifact(it) }
                 pom.withXml {
                     val root = asNode()
-                    val children = root.children().filterIsInstance<groovy.util.Node>()
-                    children.filter { it.name().toString().substringAfterLast(":") == "dependencies" }
-                        .forEach { root.remove(it) }
-                    // slf4j-api as optional runtime dep (not shaded)
+                    // Remove all existing <dependencies> nodes (there may be more
+                    // than one if multiple publish hooks have contributed).
+                    // Matching must cope with namespaced QName via localPart.
+                    val toRemove = root.children().filterIsInstance<groovy.util.Node>()
+                        .filter {
+                            // QName.toString() is "{namespace}localname"; plain
+                            // names lack the "}" so substringAfterLast is a no-op.
+                            it.name().toString().substringAfterLast("}") == "dependencies"
+                        }
+                    toRemove.forEach { root.remove(it) }
+                    // Declare slf4j-api as optional runtime dep; everything else
+                    // is shaded into the uber-JAR.
                     val deps = root.appendNode("dependencies")
                     val dep = deps.appendNode("dependency")
                     dep.appendNode("groupId", "org.slf4j")
