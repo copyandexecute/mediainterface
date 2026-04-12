@@ -11,27 +11,32 @@ plugins {
 }
 
 fun computeCiAwareVersion(): String {
-    val isCi = (System.getenv("CI") ?: "").equals("true", ignoreCase = true)
-            || (System.getenv("GITHUB_ACTIONS") ?: "").equals("true", ignoreCase = true)
-    if (!isCi) {
-        return "1.0-SNAPSHOT"
-    }
-
+    // Tag override: v1.2.3 -> 1.2.3 (no branch suffix)
     val refType = System.getenv("GITHUB_REF_TYPE") ?: ""
     val refName = System.getenv("GITHUB_REF_NAME") ?: ""
     if (refType.equals("tag", ignoreCase = true) && refName.isNotBlank()) {
         return refName.removePrefix("v")
     }
 
-    val snapshotBaseVersion = (System.getenv("SNAPSHOT_BASE_VERSION")
-        ?.trim()
-        ?.takeIf { it.isNotEmpty() }
-        ?: findLatestTagVersion()
-        ?: "0.1.0")
-    val baseVersion = snapshotBaseVersion
-        .removePrefix("v")
-        .removeSuffix("-SNAPSHOT")
-    return "$baseVersion-SNAPSHOT"
+    // YY.Q.BUILD-branch scheme (matches NRC clientside)
+    val now = java.time.LocalDate.now()
+    val yy = now.year % 100
+    val quarter = (now.monthValue - 1) / 3 + 1
+    val quarterStartMonth = ((now.monthValue - 1) / 3) * 3 + 1
+    val sinceDate = java.time.LocalDate.of(now.year, quarterStartMonth, 1)
+        .minusDays(1)
+        .toString()
+    val build = runGit("rev-list", "--count", "--since=$sinceDate", "HEAD") ?: "local"
+
+    // Branch suffix: prefer CI env (GitHub Actions sets GITHUB_REF_NAME for branch pushes),
+    // then CI_COMMIT_BRANCH (GitLab-style), fall back to local git.
+    val rawBranch = (if (refType.equals("branch", ignoreCase = true)) refName else null)
+        ?.takeIf { it.isNotBlank() }
+        ?: System.getenv("CI_COMMIT_BRANCH")?.takeIf { it.isNotBlank() }
+        ?: runGit("rev-parse", "--abbrev-ref", "HEAD")
+        ?: "unknown"
+    val branchSlug = rawBranch.replace("/", "-")
+    return "$yy.$quarter.$build-$branchSlug"
 }
 
 fun runGit(vararg args: String): String? {

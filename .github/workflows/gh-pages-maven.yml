@@ -1,0 +1,158 @@
+name: Publish to GitHub Pages Maven
+
+on:
+  push:
+    branches:
+      - "dev/java-8"
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+concurrency:
+  group: "gh-pages-maven-${{ github.ref }}"
+  cancel-in-progress: false
+
+jobs:
+  # --- Build Windows native DLLs (x64 + arm64) via CMake + MSVC ---
+  natives-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Build Windows DLLs
+        shell: bash
+        run: ./gradlew :mediainterface-windows:copyWindowsDlls --no-daemon
+      - name: Upload Windows natives
+        uses: actions/upload-artifact@v4
+        with:
+          name: natives-windows
+          path: mediainterface-windows/build/resources/main/native/windows/
+          if-no-files-found: error
+
+  # --- Build macOS adapter framework (x86_64 + arm64 universal) ---
+  natives-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Build macOS adapter
+        run: ./gradlew :mediainterface-macos:copyMacosAdapterAssets --no-daemon
+      - name: Upload macOS natives
+        uses: actions/upload-artifact@v4
+        with:
+          name: natives-macos
+          path: mediainterface-macos/build/resources/main/native/macos/
+          if-no-files-found: error
+
+  # --- Assemble all modules (incl. shadow uber-JAR), publish to gh-pages ---
+  publish:
+    needs: [natives-windows, natives-macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Stage prebuilt natives into src/main/resources so processResources picks them up.
+      # (copyWindowsDlls / copyMacosAdapterAssets only run on their native OS;
+      #  on ubuntu-latest they are no-ops.)
+      - name: Download Windows natives
+        uses: actions/download-artifact@v4
+        with:
+          name: natives-windows
+          path: mediainterface-windows/src/main/resources/native/windows/
+
+      - name: Download macOS natives
+        uses: actions/download-artifact@v4
+        with:
+          name: natives-macos
+          path: mediainterface-macos/src/main/resources/native/macos/
+
+      - name: Show staged natives
+        run: |
+          echo "--- Windows natives ---"
+          find mediainterface-windows/src/main/resources/native -type f | sort
+          echo "--- macOS natives ---"
+          find mediainterface-macos/src/main/resources/native -type f | sort
+
+      - name: Build & publishToMavenLocal
+        run: |
+          ./gradlew :mediainterface-core:publishToMavenLocal \
+                    :mediainterface-linux:publishToMavenLocal \
+                    :mediainterface-windows:publishToMavenLocal \
+                    :mediainterface-macos:publishToMavenLocal \
+                    :mediainterface-all:publishToMavenLocal \
+                    --no-daemon
+
+      - name: Stage maven-repo output
+        run: |
+          mkdir -p maven-repo/org/endlesssource/mediainterface
+          cp -R ~/.m2/repository/org/endlesssource/mediainterface/* maven-repo/org/endlesssource/mediainterface/
+          echo "=== Published artifacts ==="
+          find maven-repo -type f \( -name "*.jar" -o -name "*.pom" -o -name "maven-metadata.xml" \) | sort
+
+      - name: Generate index.html
+        run: |
+          OWNER="${{ github.repository_owner }}"
+          REPO="${{ github.event.repository.name }}"
+          cat > maven-repo/index.html <<HTML
+          <!doctype html>
+          <html><head><meta charset="utf-8"><title>mediainterface - Maven Repository</title>
+          <style>body{font-family:system-ui,sans-serif;max-width:780px;margin:2rem auto;padding:0 1rem;line-height:1.5}
+          pre{background:#f4f4f4;padding:1rem;border-radius:6px;overflow-x:auto}
+          code{background:#f4f4f4;padding:2px 6px;border-radius:3px}</style></head><body>
+          <h1>mediainterface (Java 8 fork)</h1>
+          <p>Public Maven repository for <a href="https://github.com/${OWNER}/${REPO}">${OWNER}/${REPO}</a>. No auth required.</p>
+
+          <h2>Uber-JAR (one dependency, everything included)</h2>
+          <pre>repositories {
+              maven("https://${OWNER}.github.io/${REPO}/")
+          }
+          dependencies {
+              implementation("org.endlesssource.mediainterface:all:&lt;VERSION&gt;")
+          }</pre>
+          <p>Contains core + windows (DLLs x64/arm64) + linux (MPRIS/DBus) + macos (framework) with SPI service files merged. slf4j-api is declared as an optional runtime dep (Minecraft already provides it).</p>
+
+          <h2>Individual modules</h2>
+          <pre>implementation("org.endlesssource.mediainterface:core:&lt;VERSION&gt;")
+          implementation("org.endlesssource.mediainterface:windows:&lt;VERSION&gt;")
+          implementation("org.endlesssource.mediainterface:linux:&lt;VERSION&gt;")
+          implementation("org.endlesssource.mediainterface:macos:&lt;VERSION&gt;")</pre>
+
+          <h2>Versioning</h2>
+          <p><code>YY.Q.BUILD-branch</code> (e.g. <code>26.2.1-dev-java-8</code>) or clean semver on tag push (<code>v1.0.0</code> &rarr; <code>1.0.0</code>).</p>
+
+          <p><a href="org/endlesssource/mediainterface/">Browse artifacts &rarr;</a></p>
+          </body></html>
+          HTML
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: maven-repo
+          publish_branch: gh-pages
+          keep_files: true
+          user_name: "github-actions[bot]"
+          user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          commit_message: "Publish ${{ github.sha }}"
