@@ -17,7 +17,7 @@ class ArtworkDecoderTest {
         byte[] input = "hello-art".getBytes(StandardCharsets.UTF_8);
         String base64 = Base64.getEncoder().encodeToString(input);
         assertTrue(ArtworkDecoder.decodeBytes(base64).isPresent());
-        assertArrayEquals(input, ArtworkDecoder.decodeBytes(base64).orElseThrow());
+        assertArrayEquals(input, ArtworkDecoder.decodeBytes(base64).orElseThrow(AssertionError::new));
     }
 
     @Test
@@ -25,7 +25,7 @@ class ArtworkDecoderTest {
         byte[] input = "img-bytes".getBytes(StandardCharsets.UTF_8);
         String dataUri = "data:image/png;base64," + Base64.getEncoder().encodeToString(input);
         assertTrue(ArtworkDecoder.decodeBytes(dataUri).isPresent());
-        assertArrayEquals(input, ArtworkDecoder.decodeBytes(dataUri).orElseThrow());
+        assertArrayEquals(input, ArtworkDecoder.decodeBytes(dataUri).orElseThrow(AssertionError::new));
     }
 
     @Test
@@ -36,7 +36,7 @@ class ArtworkDecoderTest {
         temp.toFile().deleteOnExit();
 
         assertTrue(ArtworkDecoder.decodeBytes(temp.toString()).isPresent());
-        assertArrayEquals(input, ArtworkDecoder.decodeBytes(temp.toString()).orElseThrow());
+        assertArrayEquals(input, ArtworkDecoder.decodeBytes(temp.toString()).orElseThrow(AssertionError::new));
     }
 }
 

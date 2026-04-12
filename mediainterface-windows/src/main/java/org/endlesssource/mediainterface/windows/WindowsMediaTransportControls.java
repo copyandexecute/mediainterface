@@ -81,12 +81,22 @@ final class WindowsMediaTransportControls implements MediaTransportControls {
 
     PlaybackState refreshPlaybackState() {
         int code = WinRtBridge.nativeGetPlaybackState(sessionId);
-        cachedPlaybackState = switch (code) {
-            case 0 -> PlaybackState.PLAYING;
-            case 1 -> PlaybackState.PAUSED;
-            case 2 -> PlaybackState.STOPPED;
-            default -> PlaybackState.UNKNOWN;
-        };
+        PlaybackState state;
+        switch (code) {
+            case 0:
+                state = PlaybackState.PLAYING;
+                break;
+            case 1:
+                state = PlaybackState.PAUSED;
+                break;
+            case 2:
+                state = PlaybackState.STOPPED;
+                break;
+            default:
+                state = PlaybackState.UNKNOWN;
+                break;
+        }
+        cachedPlaybackState = state;
         return cachedPlaybackState;
     }
 

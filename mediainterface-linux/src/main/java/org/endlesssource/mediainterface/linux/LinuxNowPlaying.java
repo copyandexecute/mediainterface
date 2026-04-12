@@ -122,21 +122,24 @@ class LinuxNowPlaying implements NowPlaying {
     }
 
     private Optional<Long> coerceToLong(Object value) {
-        if (value instanceof Number number) {
-            return Optional.of(number.longValue());
+        if (value instanceof Number) {
+            return Optional.of(((Number) value).longValue());
         }
-        if (value instanceof String stringValue) {
+        if (value instanceof String) {
             try {
-                return Optional.of(Long.parseLong(stringValue));
+                return Optional.of(Long.parseLong((String) value));
             } catch (NumberFormatException ignored) {
                 return Optional.empty();
             }
         }
-        if (value instanceof List<?> list && !list.isEmpty()) {
-            for (Object element : list) {
-                Optional<Long> coerced = coerceToLong(element);
-                if (coerced.isPresent()) {
-                    return coerced;
+        if (value instanceof List<?>) {
+            List<?> list = (List<?>) value;
+            if (!list.isEmpty()) {
+                for (Object element : list) {
+                    Optional<Long> coerced = coerceToLong(element);
+                    if (coerced.isPresent()) {
+                        return coerced;
+                    }
                 }
             }
         }
@@ -171,18 +174,21 @@ class LinuxNowPlaying implements NowPlaying {
 
     private Optional<List<String>> getStringList(String key) {
         Object value = metadata.get(key);
-        if (value instanceof List<?> list && !list.isEmpty()) {
-            List<String> strings = new ArrayList<>();
-            for (Object element : list) {
-                coerceToString(element).ifPresent(strings::add);
-            }
-            if (!strings.isEmpty()) {
-                return Optional.of(strings);
+        if (value instanceof List<?>) {
+            List<?> list = (List<?>) value;
+            if (!list.isEmpty()) {
+                List<String> strings = new ArrayList<>();
+                for (Object element : list) {
+                    coerceToString(element).ifPresent(strings::add);
+                }
+                if (!strings.isEmpty()) {
+                    return Optional.of(strings);
+                }
             }
         } else {
             Optional<String> coerce = coerceToString(value);
             if (coerce.isPresent()) {
-                return Optional.of(List.of(coerce.get()));
+                return Optional.of(java.util.Collections.singletonList(coerce.get()));
             }
         }
         return Optional.empty();
@@ -190,21 +196,24 @@ class LinuxNowPlaying implements NowPlaying {
 
     private Optional<Long> getLongValue(String key) {
         Object value = metadata.get(key);
-        if (value instanceof Number number) {
-            return Optional.of(number.longValue());
+        if (value instanceof Number) {
+            return Optional.of(((Number) value).longValue());
         }
-        if (value instanceof String str) {
+        if (value instanceof String) {
             try {
-                return Optional.of(Long.parseLong(str));
+                return Optional.of(Long.parseLong((String) value));
             } catch (NumberFormatException ignored) {
                 // ignore
             }
         }
-        if (value instanceof List<?> list && !list.isEmpty()) {
-            for (Object element : list) {
-                Optional<Long> coerced = coerceToLong(element);
-                if (coerced.isPresent()) {
-                    return coerced;
+        if (value instanceof List<?>) {
+            List<?> list = (List<?>) value;
+            if (!list.isEmpty()) {
+                for (Object element : list) {
+                    Optional<Long> coerced = coerceToLong(element);
+                    if (coerced.isPresent()) {
+                        return coerced;
+                    }
                 }
             }
         }
@@ -212,16 +221,20 @@ class LinuxNowPlaying implements NowPlaying {
     }
 
     private Optional<String> coerceToString(Object value) {
-        if (value instanceof CharSequence sequence && sequence.length() > 0) {
-            return Optional.of(sequence.toString());
+        if (value instanceof CharSequence) {
+            CharSequence sequence = (CharSequence) value;
+            if (sequence.length() > 0) {
+                return Optional.of(sequence.toString());
+            }
         }
-        if (value instanceof byte[] bytes) {
-            String decoded = new String(bytes, StandardCharsets.UTF_8).trim();
+        if (value instanceof byte[]) {
+            String decoded = new String((byte[]) value, StandardCharsets.UTF_8).trim();
             if (!decoded.isEmpty()) {
                 return Optional.of(decoded);
             }
         }
-        if (value instanceof List<?> list) {
+        if (value instanceof List<?>) {
+            List<?> list = (List<?>) value;
             for (Object element : list) {
                 Optional<String> coerced = coerceToString(element);
                 if (coerced.isPresent()) {

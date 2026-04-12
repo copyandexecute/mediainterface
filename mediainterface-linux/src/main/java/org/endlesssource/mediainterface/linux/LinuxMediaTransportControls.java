@@ -98,7 +98,7 @@ class LinuxMediaTransportControls implements MediaTransportControls {
     public boolean seek(Duration position) {
         try {
             Optional<ObjectPath> trackId = getCurrentTrackId();
-            if (trackId.isEmpty()) {
+            if (!trackId.isPresent()) {
                 logger.debug("Cannot seek because current track id is unavailable");
                 return false;
             }
@@ -135,12 +135,13 @@ class LinuxMediaTransportControls implements MediaTransportControls {
             Object statusObj = properties.Get("org.mpris.MediaPlayer2.Player", "PlaybackStatus");
             String status = null;
 
-            if (statusObj instanceof Variant<?> statusVariant) {
-                if (statusVariant.getValue() instanceof String statusStr) {
-                    status = statusStr;
+            if (statusObj instanceof Variant<?>) {
+                Variant<?> statusVariant = (Variant<?>) statusObj;
+                if (statusVariant.getValue() instanceof String) {
+                    status = (String) statusVariant.getValue();
                 }
-            } else if (statusObj instanceof String statusStr) {
-                status = statusStr;
+            } else if (statusObj instanceof String) {
+                status = (String) statusObj;
             }
 
             if (status != null) {
@@ -196,8 +197,8 @@ class LinuxMediaTransportControls implements MediaTransportControls {
     private Optional<Boolean> getBooleanProperty(String propertyName) {
         try {
             Variant<?> variant = properties.Get("org.mpris.MediaPlayer2.Player", propertyName);
-            if (variant != null && variant.getValue() instanceof Boolean value) {
-                return Optional.of(value);
+            if (variant != null && variant.getValue() instanceof Boolean) {
+                return Optional.of((Boolean) variant.getValue());
             }
         } catch (Exception e) {
             logger.debug("Failed to get boolean property {}: {}", propertyName, e.getMessage());
@@ -239,8 +240,8 @@ class LinuxMediaTransportControls implements MediaTransportControls {
                     .map(map -> map.get("mpris:trackid"))
                     .flatMap(value -> {
                         Object unwrapped = MprisMetadataUtils.unwrap(value);
-                        if (unwrapped instanceof ObjectPath path) {
-                            return Optional.of(path);
+                        if (unwrapped instanceof ObjectPath) {
+                            return Optional.of((ObjectPath) unwrapped);
                         }
                         return Optional.empty();
                     });

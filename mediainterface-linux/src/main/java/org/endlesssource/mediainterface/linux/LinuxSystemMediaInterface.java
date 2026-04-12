@@ -56,13 +56,16 @@ public class LinuxSystemMediaInterface implements SystemMediaInterface {
     public Optional<MediaSession> getActiveSession() {
         // In Linux, we'll consider the first playing session as "active"
         List<LinuxMediaSession> snapshot = new ArrayList<>(sessions.values());
-        return snapshot.stream()
+        Optional<MediaSession> playing = snapshot.stream()
                 .filter(session -> session.getControls().getPlaybackState() == PlaybackState.PLAYING)
                 .findFirst()
-                .map(session -> (MediaSession) session)
-                .or(() -> snapshot.stream()
-                        .findFirst()
-                        .map(session -> (MediaSession) session));
+                .map(session -> (MediaSession) session);
+        if (playing.isPresent()) {
+            return playing;
+        }
+        return snapshot.stream()
+                .findFirst()
+                .map(session -> (MediaSession) session);
     }
 
     @Override

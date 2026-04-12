@@ -10,6 +10,7 @@ import org.endlesssource.mediainterface.api.TransportCapabilities;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +27,7 @@ public final class DummySystemMediaInterface implements SystemMediaInterface {
 
     @Override
     public List<MediaSession> getAllSessions() {
-        return List.of(session);
+        return Collections.singletonList(session);
     }
 
     @Override
@@ -152,7 +153,7 @@ public final class DummySystemMediaInterface implements SystemMediaInterface {
         public Optional<Duration> getPosition() { return Optional.of(Duration.ofSeconds(30)); }
 
         @Override
-        public Map<String, String> getAdditionalMetadata() { return Map.of("genre", "test"); }
+        public Map<String, String> getAdditionalMetadata() { return Collections.singletonMap("genre", "test"); }
 
         @Override
         public boolean isLiveStream() { return false; }

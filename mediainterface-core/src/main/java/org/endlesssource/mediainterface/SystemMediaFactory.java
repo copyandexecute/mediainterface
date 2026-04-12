@@ -44,7 +44,7 @@ public final class SystemMediaFactory {
         List<PlatformMediaProvider> candidates = providers.stream()
                 .filter(PlatformMediaProvider::supportsCurrentOs)
                 .sorted(Comparator.comparing(PlatformMediaProvider::platformId))
-                .toList();
+                .collect(Collectors.toList());
 
         if (candidates.isEmpty()) {
             throw new UnsupportedOperationException("No provider module found for current platform: " + currentPlatform);
@@ -121,14 +121,14 @@ public final class SystemMediaFactory {
         String current = getPlatformName();
         List<PlatformMediaProvider> candidates = loadProviders().stream()
                 .filter(PlatformMediaProvider::supportsCurrentOs)
-                .toList();
+                .collect(Collectors.toList());
         if (candidates.isEmpty()) {
             return PlatformSupport.notCompiled(current,
                     "No provider module on classpath for platform: " + current);
         }
         List<PlatformSupport> probes = candidates.stream()
                 .map(PlatformMediaProvider::probeSupport)
-                .toList();
+                .collect(Collectors.toList());
         Optional<PlatformSupport> available = probes.stream()
                 .filter(PlatformSupport::available)
                 .findFirst();
@@ -137,9 +137,9 @@ public final class SystemMediaFactory {
         }
         String reasons = probes.stream()
                 .map(PlatformSupport::reason)
-                .filter(reason -> reason != null && !reason.isBlank())
+                .filter(reason -> reason != null && !reason.trim().isEmpty())
                 .collect(Collectors.joining("; "));
-        return PlatformSupport.unavailable(current, reasons.isBlank() ? "Provider probe failed" : reasons);
+        return PlatformSupport.unavailable(current, reasons.trim().isEmpty() ? "Provider probe failed" : reasons);
     }
 
     private static List<PlatformMediaProvider> loadProviders() {

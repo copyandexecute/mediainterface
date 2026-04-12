@@ -1,10 +1,13 @@
 package org.endlesssource.mediainterface.api;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -23,7 +26,7 @@ public final class ArtworkDecoder {
      * @return decoded bytes if successful
      */
     public static Optional<byte[]> decodeBytes(String artworkValue) {
-        if (artworkValue == null || artworkValue.isBlank()) {
+        if (artworkValue == null || artworkValue.trim().isEmpty()) {
             return Optional.empty();
         }
 
@@ -43,14 +46,16 @@ public final class ArtworkDecoder {
         if (value.startsWith("file:") || value.startsWith("http://") || value.startsWith("https://")) {
             try {
                 URL url = URI.create(value).toURL();
-                return Optional.of(url.openStream().readAllBytes());
+                try (InputStream in = url.openStream()) {
+                    return Optional.of(readAllBytes(in));
+                }
             } catch (IllegalArgumentException | IOException ex) {
                 return Optional.empty();
             }
         }
 
         try {
-            Path path = Path.of(value);
+            Path path = Paths.get(value);
             if (Files.exists(path)) {
                 return Optional.of(Files.readAllBytes(path));
             }
@@ -64,5 +69,15 @@ public final class ArtworkDecoder {
         } catch (IllegalArgumentException ex) {
             return Optional.empty();
         }
+    }
+
+    private static byte[] readAllBytes(InputStream in) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] chunk = new byte[8192];
+        int n;
+        while ((n = in.read(chunk)) != -1) {
+            buffer.write(chunk, 0, n);
+        }
+        return buffer.toByteArray();
     }
 }

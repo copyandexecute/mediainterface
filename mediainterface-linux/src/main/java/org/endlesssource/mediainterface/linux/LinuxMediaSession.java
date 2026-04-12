@@ -215,7 +215,7 @@ class LinuxMediaSession implements MediaSession {
         }
 
         Optional<Duration> computedPosition = projectedAnchorPosition(nowMonotonicNanos);
-        if (computedPosition.isEmpty()) {
+        if (!computedPosition.isPresent()) {
             computedPosition = rawPosition;
         }
 
@@ -235,13 +235,13 @@ class LinuxMediaSession implements MediaSession {
                                       Optional<Duration> predictedBefore,
                                       PlaybackState state,
                                       double rate) {
-        if (anchorPosition.isEmpty()) {
+        if (!anchorPosition.isPresent()) {
             return true;
         }
         if (state != anchorState || Math.abs(rate - anchorRate) > RATE_EPSILON) {
             return true;
         }
-        if (predictedBefore.isEmpty()) {
+        if (!predictedBefore.isPresent()) {
             return true;
         }
 
@@ -259,7 +259,7 @@ class LinuxMediaSession implements MediaSession {
     }
 
     private Optional<Duration> projectedAnchorPosition(long nowMonotonicNanos) {
-        if (anchorPosition.isEmpty()) {
+        if (!anchorPosition.isPresent()) {
             return Optional.empty();
         }
         if (anchorState != PlaybackState.PLAYING || anchorRate <= 0.0d) {
@@ -281,8 +281,8 @@ class LinuxMediaSession implements MediaSession {
         try {
             Object rateObj = properties.Get("org.mpris.MediaPlayer2.Player", "Rate");
             Object unwrapped = MprisMetadataUtils.unwrap(rateObj);
-            if (unwrapped instanceof Number number) {
-                return Optional.of(number.doubleValue());
+            if (unwrapped instanceof Number) {
+                return Optional.of(((Number) unwrapped).doubleValue());
             }
         } catch (Exception e) {
             logger.debug("Failed to get playback rate via properties for {}: {}", busName, e.getMessage());

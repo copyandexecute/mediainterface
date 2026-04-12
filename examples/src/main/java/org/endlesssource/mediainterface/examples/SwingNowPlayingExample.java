@@ -162,7 +162,7 @@ public final class SwingNowPlayingExample {
 
     private static UiSnapshot collectSnapshot(SystemMediaInterface media) {
         Optional<MediaSession> sessionOpt = media.getActiveSession();
-        if (sessionOpt.isEmpty()) {
+        if (!sessionOpt.isPresent()) {
             return UiSnapshot.empty();
         }
 
@@ -172,7 +172,7 @@ public final class SwingNowPlayingExample {
         Optional<NowPlaying> nowOpt = session.getNowPlaying();
         String tree = toTree(session, playbackState, nowOpt);
 
-        if (nowOpt.isEmpty()) {
+        if (!nowOpt.isPresent()) {
             return new UiSnapshot(tree, null, false, null, null);
         }
 
@@ -229,7 +229,7 @@ public final class SwingNowPlayingExample {
         out.append("├─ playbackState: ").append(state).append('\n');
         out.append("└─ nowPlaying");
 
-        if (nowOpt.isEmpty()) {
+        if (!nowOpt.isPresent()) {
             out.append(": <empty>\n");
             return out.toString();
         }
@@ -239,7 +239,7 @@ public final class SwingNowPlayingExample {
         String duration = now.getDuration().map(SwingNowPlayingExample::formatDuration).orElse("--:--");
         String position = now.getPosition().map(SwingNowPlayingExample::formatDuration).orElse("--:--");
         String artwork = now.getArtwork().orElse("");
-        String artworkSummary = artwork.isBlank() ? "<none>" : ("present (" + artwork.length() + " chars)");
+        String artworkSummary = artwork.trim().isEmpty() ? "<none>" : ("present (" + artwork.length() + " chars)");
 
         out.append("   ├─ title: ").append(now.getTitle().orElse("<none>")).append('\n');
         out.append("   ├─ artist: ").append(now.getArtist().orElse("<none>")).append('\n');
@@ -290,11 +290,27 @@ public final class SwingNowPlayingExample {
         return formatDuration(Duration.ofMillis(millis));
     }
 
-    private record UiSnapshot(String tree,
-                              ImageIcon icon,
-                              boolean seekEnabled,
-                              Long durationMs,
-                              Long positionMs) {
+    private static final class UiSnapshot {
+        private final String tree;
+        private final ImageIcon icon;
+        private final boolean seekEnabled;
+        private final Long durationMs;
+        private final Long positionMs;
+
+        UiSnapshot(String tree, ImageIcon icon, boolean seekEnabled, Long durationMs, Long positionMs) {
+            this.tree = tree;
+            this.icon = icon;
+            this.seekEnabled = seekEnabled;
+            this.durationMs = durationMs;
+            this.positionMs = positionMs;
+        }
+
+        String tree() { return tree; }
+        ImageIcon icon() { return icon; }
+        boolean seekEnabled() { return seekEnabled; }
+        Long durationMs() { return durationMs; }
+        Long positionMs() { return positionMs; }
+
         static UiSnapshot empty() {
             return new UiSnapshot(
                     "MediaSession\n└─ nowPlaying: <empty>\n",

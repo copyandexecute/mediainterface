@@ -122,7 +122,7 @@ final class WindowsMediaSession implements MediaSession {
             controls.refreshCapabilities();
 
             String appName = WinRtBridge.nativeGetSessionAppName(sessionId);
-            if (appName != null && !appName.isBlank()) {
+            if (appName != null && !appName.trim().isEmpty()) {
                 cachedAppName = appName;
             }
 
@@ -162,7 +162,7 @@ final class WindowsMediaSession implements MediaSession {
             return;
         }
         Snapshot base = lastSnapshot;
-        if (base == null || base.positionMs().isEmpty()) {
+        if (base == null || !base.positionMs().isPresent()) {
             return;
         }
 
@@ -178,14 +178,43 @@ final class WindowsMediaSession implements MediaSession {
         listeners.forEach(listener -> listener.onNowPlayingChanged(this, cachedNowPlaying));
     }
 
-    private record Snapshot(Optional<String> title,
-                            Optional<String> artist,
-                            Optional<String> album,
-                            Optional<String> artwork,
-                            Optional<Long> durationMs,
-                            Optional<Long> positionMs,
-                            boolean live,
-                            String metadataPairs) {
+    private static final class Snapshot {
+        private final Optional<String> title;
+        private final Optional<String> artist;
+        private final Optional<String> album;
+        private final Optional<String> artwork;
+        private final Optional<Long> durationMs;
+        private final Optional<Long> positionMs;
+        private final boolean live;
+        private final String metadataPairs;
+
+        Snapshot(Optional<String> title,
+                 Optional<String> artist,
+                 Optional<String> album,
+                 Optional<String> artwork,
+                 Optional<Long> durationMs,
+                 Optional<Long> positionMs,
+                 boolean live,
+                 String metadataPairs) {
+            this.title = title;
+            this.artist = artist;
+            this.album = album;
+            this.artwork = artwork;
+            this.durationMs = durationMs;
+            this.positionMs = positionMs;
+            this.live = live;
+            this.metadataPairs = metadataPairs;
+        }
+
+        Optional<String> title() { return title; }
+        Optional<String> artist() { return artist; }
+        Optional<String> album() { return album; }
+        Optional<String> artwork() { return artwork; }
+        Optional<Long> durationMs() { return durationMs; }
+        Optional<Long> positionMs() { return positionMs; }
+        boolean live() { return live; }
+        String metadataPairs() { return metadataPairs; }
+
         static Snapshot fromPayload(String[] payload) {
             if (payload == null || payload.length == 0) {
                 return new Snapshot(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
@@ -217,7 +246,7 @@ final class WindowsMediaSession implements MediaSession {
         }
 
         boolean isEmpty() {
-            return title.isEmpty() && artist.isEmpty() && album.isEmpty() && artwork.isEmpty() && durationMs.isEmpty();
+            return !title.isPresent() && !artist.isPresent() && !album.isPresent() && !artwork.isPresent() && !durationMs.isPresent();
         }
 
         boolean sameMedia(Snapshot other, boolean includePositionChanges) {
@@ -239,11 +268,11 @@ final class WindowsMediaSession implements MediaSession {
         }
 
         double playbackRate() {
-            if (metadataPairs == null || metadataPairs.isBlank()) {
+            if (metadataPairs == null || metadataPairs.trim().isEmpty()) {
                 return 1.0d;
             }
             for (String line : metadataPairs.split("\\R")) {
-                if (line == null || line.isBlank() || !line.startsWith("playbackRate=")) {
+                if (line == null || line.trim().isEmpty() || !line.startsWith("playbackRate=")) {
                     continue;
                 }
                 String value = line.substring("playbackRate=".length()).trim();
@@ -260,7 +289,7 @@ final class WindowsMediaSession implements MediaSession {
         }
 
         Snapshot projectedTo(long nowMonotonicNanos, long anchorMonotonicNanos, double playbackRate) {
-            if (positionMs.isEmpty()) {
+            if (!positionMs.isPresent()) {
                 return this;
             }
             if (playbackRate <= 0.0d) {
@@ -292,13 +321,13 @@ final class WindowsMediaSession implements MediaSession {
                     durationMs.map(String::valueOf).orElse(null),
                     positionMs.map(String::valueOf).orElse(null),
                     String.valueOf(live),
-                    metadataPairs.isBlank() ? null : metadataPairs
+                    metadataPairs.trim().isEmpty() ? null : metadataPairs
             };
             return new WindowsNowPlaying(payload);
         }
 
         private static Optional<String> optional(String[] payload, int index) {
-            if (payload.length <= index || payload[index] == null || payload[index].isBlank()) {
+            if (payload.length <= index || payload[index] == null || payload[index].trim().isEmpty()) {
                 return Optional.empty();
             }
             return Optional.of(payload[index]);
@@ -306,7 +335,7 @@ final class WindowsMediaSession implements MediaSession {
 
         private static Optional<Long> parseLong(String[] payload, int index) {
             Optional<String> value = optional(payload, index);
-            if (value.isEmpty()) {
+            if (!value.isPresent()) {
                 return Optional.empty();
             }
             try {
@@ -332,12 +361,12 @@ final class WindowsMediaSession implements MediaSession {
         }
 
         private static String normalizeMetadataForComparison(String metadata) {
-            if (metadata == null || metadata.isBlank()) {
+            if (metadata == null || metadata.trim().isEmpty()) {
                 return "";
             }
             StringBuilder out = new StringBuilder();
             for (String line : metadata.split("\\R")) {
-                if (line == null || line.isBlank()) {
+                if (line == null || line.trim().isEmpty()) {
                     continue;
                 }
                 int sep = line.indexOf('=');

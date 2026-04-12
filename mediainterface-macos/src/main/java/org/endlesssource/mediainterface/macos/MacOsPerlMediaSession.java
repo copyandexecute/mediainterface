@@ -96,7 +96,7 @@ final class MacOsPerlMediaSession implements MediaSession {
         cachedActive = adapterSnapshot.active();
 
         String app = adapterSnapshot.app();
-        cachedApplicationName = (app == null || app.isBlank()) ? "System" : app;
+        cachedApplicationName = (app == null || app.trim().isEmpty()) ? "System" : app;
 
         Optional<NowPlaying> now = toNowPlaying(adapterSnapshot);
         cachedNowPlaying = now;
@@ -144,7 +144,7 @@ final class MacOsPerlMediaSession implements MediaSession {
         if (snapshot.durationMs() != null) {
             return snapshot.durationMs();
         }
-        if (lastSnapshot == null || lastSnapshot.durationMs().isEmpty()) {
+        if (lastSnapshot == null || !lastSnapshot.durationMs().isPresent()) {
             return null;
         }
         boolean sameTrackIdentity = Objects.equals(snapshot.title(), lastSnapshot.title().orElse(null))
@@ -154,18 +154,44 @@ final class MacOsPerlMediaSession implements MediaSession {
     }
 
     private static PlaybackState toPlaybackState(String playingRaw) {
-        return switch (playingRaw) {
-            case "1" -> PlaybackState.PLAYING;
-            case "0" -> PlaybackState.PAUSED;
-            default -> PlaybackState.UNKNOWN;
-        };
+        if (playingRaw == null) {
+            return PlaybackState.UNKNOWN;
+        }
+        switch (playingRaw) {
+            case "1":
+                return PlaybackState.PLAYING;
+            case "0":
+                return PlaybackState.PAUSED;
+            default:
+                return PlaybackState.UNKNOWN;
+        }
     }
 
-    private record Snapshot(Optional<String> title,
-                            Optional<String> artist,
-                            Optional<String> album,
-                            Optional<Long> durationMs,
-                            Optional<Long> positionSec) {
+    private static final class Snapshot {
+        private final Optional<String> title;
+        private final Optional<String> artist;
+        private final Optional<String> album;
+        private final Optional<Long> durationMs;
+        private final Optional<Long> positionSec;
+
+        Snapshot(Optional<String> title,
+                 Optional<String> artist,
+                 Optional<String> album,
+                 Optional<Long> durationMs,
+                 Optional<Long> positionSec) {
+            this.title = title;
+            this.artist = artist;
+            this.album = album;
+            this.durationMs = durationMs;
+            this.positionSec = positionSec;
+        }
+
+        Optional<String> title() { return title; }
+        Optional<String> artist() { return artist; }
+        Optional<String> album() { return album; }
+        Optional<Long> durationMs() { return durationMs; }
+        Optional<Long> positionSec() { return positionSec; }
+
         static Snapshot fromNowPlaying(NowPlaying now) {
             return new Snapshot(
                     now.getTitle(),
@@ -178,6 +204,23 @@ final class MacOsPerlMediaSession implements MediaSession {
 
         static Snapshot empty() {
             return new Snapshot(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Snapshot)) return false;
+            Snapshot other = (Snapshot) o;
+            return title.equals(other.title)
+                    && artist.equals(other.artist)
+                    && album.equals(other.album)
+                    && durationMs.equals(other.durationMs)
+                    && positionSec.equals(other.positionSec);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(title, artist, album, durationMs, positionSec);
         }
     }
 }

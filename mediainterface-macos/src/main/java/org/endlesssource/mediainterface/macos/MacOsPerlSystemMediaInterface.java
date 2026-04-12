@@ -5,6 +5,7 @@ import org.endlesssource.mediainterface.api.MediaSessionListener;
 import org.endlesssource.mediainterface.api.SystemMediaInterface;
 import org.endlesssource.mediainterface.api.SystemMediaOptions;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -27,7 +28,7 @@ final class MacOsPerlSystemMediaInterface implements SystemMediaInterface {
 
     @Override
     public List<MediaSession> getAllSessions() {
-        return session.isActive() ? List.of(session) : List.of();
+        return session.isActive() ? Collections.<MediaSession>singletonList(session) : Collections.<MediaSession>emptyList();
     }
 
     @Override

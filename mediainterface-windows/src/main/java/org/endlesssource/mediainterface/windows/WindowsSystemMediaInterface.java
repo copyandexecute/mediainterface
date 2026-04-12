@@ -45,13 +45,16 @@ public final class WindowsSystemMediaInterface implements SystemMediaInterface {
     @Override
     public Optional<MediaSession> getActiveSession() {
         List<WindowsMediaSession> snapshot = new ArrayList<>(sessions.values());
-        return snapshot.stream()
+        Optional<MediaSession> playing = snapshot.stream()
                 .filter(session -> session.getControls().getPlaybackState() == PlaybackState.PLAYING)
                 .findFirst()
-                .map(session -> (MediaSession) session)
-                .or(() -> snapshot.stream()
-                        .findFirst()
-                        .map(session -> (MediaSession) session));
+                .map(session -> (MediaSession) session);
+        if (playing.isPresent()) {
+            return playing;
+        }
+        return snapshot.stream()
+                .findFirst()
+                .map(session -> (MediaSession) session);
     }
 
     @Override
@@ -126,7 +129,7 @@ public final class WindowsSystemMediaInterface implements SystemMediaInterface {
         }
         Set<String> current = new HashSet<>();
         for (String id : ids) {
-            if (id == null || id.isBlank()) {
+            if (id == null || id.trim().isEmpty()) {
                 continue;
             }
             current.add(id);
@@ -143,7 +146,7 @@ public final class WindowsSystemMediaInterface implements SystemMediaInterface {
     }
 
     private void addSession(String id) {
-        if (id == null || id.isBlank() || sessions.containsKey(id)) {
+        if (id == null || id.trim().isEmpty() || sessions.containsKey(id)) {
             return;
         }
         WindowsMediaSession session = new WindowsMediaSession(

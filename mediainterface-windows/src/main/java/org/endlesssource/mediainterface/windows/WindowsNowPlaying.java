@@ -82,12 +82,12 @@ final class WindowsNowPlaying implements NowPlaying {
             return Optional.empty();
         }
         String value = payload[index];
-        return value == null || value.isBlank() ? Optional.empty() : Optional.of(value);
+        return value == null || value.trim().isEmpty() ? Optional.empty() : Optional.of(value);
     }
 
     private static Optional<Duration> parseDuration(String[] payload, int index) {
         Optional<String> value = optional(payload, index);
-        if (value.isEmpty()) {
+        if (!value.isPresent()) {
             return Optional.empty();
         }
         try {
@@ -107,7 +107,7 @@ final class WindowsNowPlaying implements NowPlaying {
 
     private static Map<String, String> parseAdditionalMetadata(String[] payload, int index) {
         Optional<String> encoded = optional(payload, index);
-        if (encoded.isEmpty()) {
+        if (!encoded.isPresent()) {
             return Collections.emptyMap();
         }
         Map<String, String> out = new HashMap<>();

@@ -25,7 +25,7 @@ public final class SimpleMediaLoggerExample {
             while (true) {
                 Optional<MediaSession> activeSession = media.getActiveSession();
 
-                if (activeSession.isEmpty()) {
+                if (!activeSession.isPresent()) {
                     logger.info("no active session");
                     return;
                 }

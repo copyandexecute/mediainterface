@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.Optional;
@@ -32,9 +33,9 @@ final class MacOsPerlAdapter {
         String envTestClient = trimToNull(System.getenv("MEDIAREMOTE_ADAPTER_TEST_CLIENT_PATH"));
 
         if (envFramework != null) {
-            this.scriptPath = envScript != null ? Path.of(envScript) : extractScript();
-            this.frameworkPath = Path.of(envFramework);
-            this.testClientPath = envTestClient != null ? Path.of(envTestClient) : null;
+            this.scriptPath = envScript != null ? Paths.get(envScript) : extractScript();
+            this.frameworkPath = Paths.get(envFramework);
+            this.testClientPath = envTestClient != null ? Paths.get(envTestClient) : null;
             logger.info("Using MediaRemote adapter in external framework mode");
         } else {
             this.scriptPath = extractScript();
@@ -44,21 +45,21 @@ final class MacOsPerlAdapter {
             logger.info("Using MediaRemote adapter in bundled framework mode");
         }
         runOfficialRaw("test").ifPresent(out -> {
-            if (!out.isBlank()) {
+            if (!out.trim().isEmpty()) {
                 logger.info("Adapter test stdout: {}", out);
             }
         });
     }
 
     static boolean isSupported() {
-        if (!Files.isExecutable(Path.of("/usr/bin/perl"))) {
+        if (!Files.isExecutable(Paths.get("/usr/bin/perl"))) {
             return false;
         }
         String envFramework = trimToNull(System.getenv("MEDIAREMOTE_ADAPTER_FRAMEWORK_PATH"));
         String envScript = trimToNull(System.getenv("MEDIAREMOTE_ADAPTER_SCRIPT_PATH"));
         if (envFramework != null) {
-            boolean frameworkOk = Files.exists(Path.of(envFramework));
-            boolean scriptOk = envScript == null || Files.exists(Path.of(envScript));
+            boolean frameworkOk = Files.exists(Paths.get(envFramework));
+            boolean scriptOk = envScript == null || Files.exists(Paths.get(envScript));
             return frameworkOk && scriptOk;
         }
         String arch = normalizedJvmArch();
@@ -157,15 +158,15 @@ final class MacOsPerlAdapter {
                 logger.debug("Official adapter command timed out: {}", String.join(" ", pb.command()));
                 return Optional.empty();
             }
-            String out = Files.readString(stdoutFile, StandardCharsets.UTF_8).trim();
-            String err = Files.readString(stderrFile, StandardCharsets.UTF_8).trim();
+            String out = new String(Files.readAllBytes(stdoutFile), StandardCharsets.UTF_8).trim();
+            String err = new String(Files.readAllBytes(stderrFile), StandardCharsets.UTF_8).trim();
             int exitCode = p.exitValue();
-            if (!err.isBlank()) {
+            if (!err.trim().isEmpty()) {
                 logger.info("Official adapter stderr ({}): {}", exitCode, err);
             }
             if (exitCode != 0) {
                 logger.warn("Official adapter command failed with exit {}: {}", exitCode, String.join(" ", pb.command()));
-                if (!out.isBlank()) {
+                if (!out.trim().isEmpty()) {
                     logger.warn("Official adapter stdout on failure: {}", out);
                 }
                 return Optional.empty();
@@ -178,7 +179,7 @@ final class MacOsPerlAdapter {
     }
 
     private Snapshot parseOfficialJsonSnapshot(String json) {
-        if (json == null || json.isBlank() || "null".equals(json.trim())) {
+        if (json == null || json.trim().isEmpty() || "null".equals(json.trim())) {
             return new Snapshot(false, null, null, null, null, null, null, null, "u");
         }
         String title = extractJsonString(json, "title");
@@ -201,7 +202,7 @@ final class MacOsPerlAdapter {
                 playingRaw,
                 durationMs
         );
-        boolean active = title != null && !title.isBlank();
+        boolean active = title != null && !title.trim().isEmpty();
         String artwork = toDataUri(artworkData, artworkMimeType);
         return new Snapshot(active, app, title, artist, album, artwork, durationMs, positionMs, playingRaw);
     }
@@ -298,10 +299,10 @@ final class MacOsPerlAdapter {
     }
 
     private static String toDataUri(String artworkData, String artworkMimeType) {
-        if (artworkData == null || artworkData.isBlank()) {
+        if (artworkData == null || artworkData.trim().isEmpty()) {
             return null;
         }
-        String mime = (artworkMimeType == null || artworkMimeType.isBlank()) ? "image/jpeg" : artworkMimeType.trim();
+        String mime = (artworkMimeType == null || artworkMimeType.trim().isEmpty()) ? "image/jpeg" : artworkMimeType.trim();
         return "data:" + mime + ";base64," + artworkData.trim();
     }
 
@@ -387,19 +388,59 @@ final class MacOsPerlAdapter {
         throw new IllegalStateException("Unsupported macOS JVM architecture for adapter: " + arch);
     }
 
-    private record BundledAdapterAssets(Path frameworkPath, Path testClientPath) {
+    private static final class BundledAdapterAssets {
+        private final Path frameworkPath;
+        private final Path testClientPath;
+
+        BundledAdapterAssets(Path frameworkPath, Path testClientPath) {
+            this.frameworkPath = frameworkPath;
+            this.testClientPath = testClientPath;
+        }
+
+        Path frameworkPath() { return frameworkPath; }
+
+        Path testClientPath() { return testClientPath; }
     }
 
-    record Snapshot(
-            boolean active,
-            String app,
-            String title,
-            String artist,
-            String album,
-            String artwork,
-            Long durationMs,
-            Long positionMs,
-            String playingRaw
-    ) {
+    static final class Snapshot {
+        private final boolean active;
+        private final String app;
+        private final String title;
+        private final String artist;
+        private final String album;
+        private final String artwork;
+        private final Long durationMs;
+        private final Long positionMs;
+        private final String playingRaw;
+
+        Snapshot(boolean active,
+                 String app,
+                 String title,
+                 String artist,
+                 String album,
+                 String artwork,
+                 Long durationMs,
+                 Long positionMs,
+                 String playingRaw) {
+            this.active = active;
+            this.app = app;
+            this.title = title;
+            this.artist = artist;
+            this.album = album;
+            this.artwork = artwork;
+            this.durationMs = durationMs;
+            this.positionMs = positionMs;
+            this.playingRaw = playingRaw;
+        }
+
+        boolean active() { return active; }
+        String app() { return app; }
+        String title() { return title; }
+        String artist() { return artist; }
+        String album() { return album; }
+        String artwork() { return artwork; }
+        Long durationMs() { return durationMs; }
+        Long positionMs() { return positionMs; }
+        String playingRaw() { return playingRaw; }
     }
 }
