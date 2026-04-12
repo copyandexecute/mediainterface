@@ -1,0 +1,28 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>mediainterface - Maven Repository</title>
+<style>body{font-family:system-ui,sans-serif;max-width:780px;margin:2rem auto;padding:0 1rem;line-height:1.5}
+pre{background:#f4f4f4;padding:1rem;border-radius:6px;overflow-x:auto}
+code{background:#f4f4f4;padding:2px 6px;border-radius:3px}</style></head><body>
+<h1>mediainterface (Java 8 fork)</h1>
+<p>Public Maven repository for <a href="https://github.com/copyandexecute/mediainterface">copyandexecute/mediainterface</a>. No auth required.</p>
+
+<h2>Uber-JAR (one dependency, everything included)</h2>
+<pre>repositories {
+    maven("https://copyandexecute.github.io/mediainterface/")
+}
+dependencies {
+    implementation("org.endlesssource.mediainterface:all:&lt;VERSION&gt;")
+}</pre>
+<p>Contains core + windows (DLLs x64/arm64) + linux (MPRIS/DBus) + macos (framework) with SPI service files merged. slf4j-api is declared as an optional runtime dep (Minecraft already provides it).</p>
+
+<h2>Individual modules</h2>
+<pre>implementation("org.endlesssource.mediainterface:core:&lt;VERSION&gt;")
+implementation("org.endlesssource.mediainterface:windows:&lt;VERSION&gt;")
+implementation("org.endlesssource.mediainterface:linux:&lt;VERSION&gt;")
+implementation("org.endlesssource.mediainterface:macos:&lt;VERSION&gt;")</pre>
+
+<h2>Versioning</h2>
+<p><code>YY.Q.BUILD-branch</code> (e.g. <code>26.2.1-dev-java-8</code>) or clean semver on tag push (<code>v1.0.0</code> &rarr; <code>1.0.0</code>).</p>
+
+<p><a href="org/endlesssource/mediainterface/">Browse artifacts &rarr;</a></p>
+</body></html>
