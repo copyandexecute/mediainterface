@@ -1,0 +1,125 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.endlesssource.mediainterface",
+    "module": "macos",
+    "version": "26.2.5-dev-java-8",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.3.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "org.endlesssource.mediainterface",
+          "module": "core",
+          "version": {
+            "requires": "26.2.5-dev-java-8"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "macos-26.2.5-dev-java-8.jar",
+          "url": "macos-26.2.5-dev-java-8.jar",
+          "size": 228982,
+          "sha512": "3dd8cf2b6f5cbbd332a284aedb2cac09ea4b009a8c1897b4cf5e1170b43dec46d61f47435b472aeeb9a59cb02414f59799a3c95009820fa9cf0c87b8f2b44f45",
+          "sha256": "f6174f4fc2542cd6d5290e43bbfab9cf4f55068988161aa7d29ff50c557d8ce7",
+          "sha1": "87e726c9f8ddfabad534f1a96c37c63098fb1923",
+          "md5": "d69c0d887536100d97cace98c2bfed87"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.slf4j",
+          "module": "slf4j-api",
+          "version": {
+            "requires": "2.0.9"
+          }
+        },
+        {
+          "group": "org.endlesssource.mediainterface",
+          "module": "core",
+          "version": {
+            "requires": "26.2.5-dev-java-8"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "macos-26.2.5-dev-java-8.jar",
+          "url": "macos-26.2.5-dev-java-8.jar",
+          "size": 228982,
+          "sha512": "3dd8cf2b6f5cbbd332a284aedb2cac09ea4b009a8c1897b4cf5e1170b43dec46d61f47435b472aeeb9a59cb02414f59799a3c95009820fa9cf0c87b8f2b44f45",
+          "sha256": "f6174f4fc2542cd6d5290e43bbfab9cf4f55068988161aa7d29ff50c557d8ce7",
+          "sha1": "87e726c9f8ddfabad534f1a96c37c63098fb1923",
+          "md5": "d69c0d887536100d97cace98c2bfed87"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "macos-26.2.5-dev-java-8-sources.jar",
+          "url": "macos-26.2.5-dev-java-8-sources.jar",
+          "size": 215606,
+          "sha512": "9333269c3cc37b3043c214737b920d908b551d1e9e2bff39855cb919cd3892ea2d0465e754fc4be61edacbfcb4d56397966c39438db7bb79dad6260cce2ce8f8",
+          "sha256": "6f4fade1cd458a9ed9daef131c445c008057ed1dc390c18bb5003a057213651b",
+          "sha1": "32179bb7b2925b9633e192353830b3d41a111e76",
+          "md5": "01cd4bd380e442ea27f70317274920c5"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "macos-26.2.5-dev-java-8-javadoc.jar",
+          "url": "macos-26.2.5-dev-java-8-javadoc.jar",
+          "size": 80915,
+          "sha512": "3bd6955de876c704ff694190d800e5924efef22545230a2929fc12308e39e6c1be6ba08033cb28d777fa55d79bc38ed5ebc6d25a56c720340166ad5ea9841830",
+          "sha256": "481354f101b6cbfe11a3fbe809646c0eeae4770702583fbf5c4819f136e18fd1",
+          "sha1": "788902495029babfce54cd536fb681b79103fd5a",
+          "md5": "e5e7b8a2cb8a06a4a913a4fd9095fb1c"
+        }
+      ]
+    }
+  ]
+}
