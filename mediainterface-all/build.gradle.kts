@@ -6,12 +6,13 @@ plugins {
 }
 
 dependencies {
-    // implementation (not api) so shadow's POM rewrite drops them cleanly —
-    // the shadow jar already contains their class files & native resources.
-    implementation(project(":mediainterface-core"))
-    implementation(project(":mediainterface-linux"))
-    implementation(project(":mediainterface-windows"))
-    implementation(project(":mediainterface-macos"))
+    // `api` so consumers within this Gradle build (e.g. :examples) see the
+    // submodule classes transitively. POM deps are stripped in afterEvaluate
+    // below so external Maven consumers get only the self-contained shadow jar.
+    api(project(":mediainterface-core"))
+    api(project(":mediainterface-linux"))
+    api(project(":mediainterface-windows"))
+    api(project(":mediainterface-macos"))
     implementation("org.slf4j:slf4j-api:2.0.9")
 }
 
