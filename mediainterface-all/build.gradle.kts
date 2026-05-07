@@ -38,6 +38,12 @@ tasks.named<ShadowJar>("shadowJar") {
     }
     exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
     exclude("module-info.class")
+    // dbus-java 3.3.2 is a Multi-Release JAR with Java 11 overlays under
+    // META-INF/versions/11/. Forge 1.8.9/1.12.2 ASM 5 scans every entry and
+    // chokes on >Java 8 bytecode ("probably a corrupt zip"). Drop the overlays —
+    // Java 8 runtime ignores them anyway, and Java 11+ consumers fall back to
+    // the root classes (same code path, no functional loss for our MPRIS use).
+    exclude("META-INF/versions/**")
     // slf4j-api is typically provided by the consumer (Minecraft ships it).
     dependencies {
         exclude(dependency("org.slf4j:slf4j-api:.*"))

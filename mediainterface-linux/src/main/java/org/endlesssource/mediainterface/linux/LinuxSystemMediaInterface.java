@@ -6,7 +6,7 @@ import org.endlesssource.mediainterface.api.PlaybackState;
 import org.endlesssource.mediainterface.api.SystemMediaOptions;
 import org.endlesssource.mediainterface.api.SystemMediaInterface;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
-import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
+import org.freedesktop.dbus.connections.impl.DBusConnection.DBusBusType;
 import org.freedesktop.dbus.interfaces.DBus;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class LinuxSystemMediaInterface implements SystemMediaInterface {
 
     public LinuxSystemMediaInterface(SystemMediaOptions options) throws DBusException {
         this.options = options;
-        this.connection = DBusConnectionBuilder.forSessionBus().build();
+        this.connection = DBusConnection.getConnection(DBusBusType.SESSION);
         this.executor = options.isEventDrivenEnabled()
                 ? Executors.newScheduledThreadPool(2)
                 : null;
