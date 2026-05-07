@@ -1,0 +1,139 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.endlesssource.mediainterface",
+    "module": "linux",
+    "version": "26.2.6-dev-java-8",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.3.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "org.endlesssource.mediainterface",
+          "module": "core",
+          "version": {
+            "requires": "26.2.6-dev-java-8"
+          }
+        },
+        {
+          "group": "com.github.hypfvieh",
+          "module": "dbus-java",
+          "version": {
+            "requires": "3.3.2"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "linux-26.2.6-dev-java-8.jar",
+          "url": "linux-26.2.6-dev-java-8.jar",
+          "size": 28363,
+          "sha512": "663db73f1c9d31a6aaa10bf28f26daae4e8b986a76d8ee689b06930f94c14608724eaf6c6ad2c3ada2c1e0a185b17e8ef5ccb8ea1830e595cea02d574970350d",
+          "sha256": "cca69b279922e4b5974ae79b166dd9dd6f2ae6bb709667ccd42c409161133c4a",
+          "sha1": "33295a8019768cf3cf84fccf328c319bb1e06cd1",
+          "md5": "2c2e9b9decfec6ec7aa58c52f7cdf355"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.slf4j",
+          "module": "slf4j-api",
+          "version": {
+            "requires": "2.0.9"
+          }
+        },
+        {
+          "group": "org.endlesssource.mediainterface",
+          "module": "core",
+          "version": {
+            "requires": "26.2.6-dev-java-8"
+          }
+        },
+        {
+          "group": "com.github.hypfvieh",
+          "module": "dbus-java",
+          "version": {
+            "requires": "3.3.2"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "linux-26.2.6-dev-java-8.jar",
+          "url": "linux-26.2.6-dev-java-8.jar",
+          "size": 28363,
+          "sha512": "663db73f1c9d31a6aaa10bf28f26daae4e8b986a76d8ee689b06930f94c14608724eaf6c6ad2c3ada2c1e0a185b17e8ef5ccb8ea1830e595cea02d574970350d",
+          "sha256": "cca69b279922e4b5974ae79b166dd9dd6f2ae6bb709667ccd42c409161133c4a",
+          "sha1": "33295a8019768cf3cf84fccf328c319bb1e06cd1",
+          "md5": "2c2e9b9decfec6ec7aa58c52f7cdf355"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "linux-26.2.6-dev-java-8-sources.jar",
+          "url": "linux-26.2.6-dev-java-8-sources.jar",
+          "size": 13211,
+          "sha512": "e641f7312351c4fa4bb318ba75c8b23d39c9d2e2ef63603fb9a61fad10f7404ff76efb91a12f461954bc6ad4b3ca44c391e6baf7e93f00b054aa01b0992b4d82",
+          "sha256": "8e7944d8cac106864afe556e7dda6dc3366a8d76aad2d7ea9a51f3956de77462",
+          "sha1": "d1682659e24d9c41283fda9efb54dd9f0aa7d31d",
+          "md5": "a607f23d0bcc7097c6a8bbdf452376bc"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "linux-26.2.6-dev-java-8-javadoc.jar",
+          "url": "linux-26.2.6-dev-java-8-javadoc.jar",
+          "size": 84696,
+          "sha512": "661262f56a81b47a393b8a90da1b9b28e5ee7908170c564f1c487bc54e6c2403b1c272bd7ea3b202be6b5146d214c170dc40c4431daceed80735a783f54b07b2",
+          "sha256": "2777342a1a03ece89e457e04ae8c40828a5a5f84a80988292ad076db9f1f54dc",
+          "sha1": "209aac891cd920b2fcd9cadfd710e203edd5d073",
+          "md5": "a04f22ba65252426f69c9224d4a67be6"
+        }
+      ]
+    }
+  ]
+}
