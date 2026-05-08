@@ -24,7 +24,7 @@ public final class LinuxPlatformMediaProvider implements PlatformMediaProvider {
             return PlatformSupport.unavailable(platformId(), "Current OS is not Linux");
         }
         try {
-            Class.forName("org.freedesktop.dbus.connections.impl.DBusConnection");
+            Class.forName("org.freedesktop.dbus.connections.impl.DBusConnectionBuilder");
             return PlatformSupport.available(platformId());
         } catch (ClassNotFoundException e) {
             return PlatformSupport.unavailable(platformId(), "Missing D-Bus runtime classes");
