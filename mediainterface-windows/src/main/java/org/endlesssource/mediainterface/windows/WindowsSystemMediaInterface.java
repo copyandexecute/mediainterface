@@ -153,7 +153,8 @@ public final class WindowsSystemMediaInterface implements SystemMediaInterface {
                 id,
                 options.isEventDrivenEnabled(),
                 options.getSessionUpdateInterval(),
-                options.isPositionUpdatesEnabled()
+                options.isPositionUpdatesEnabled(),
+                options.getArtworkMaxSize()
         );
         sessions.put(id, session);
         logger.debug("Added Windows media session {}", id);

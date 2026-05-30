@@ -49,4 +49,6 @@ set_target_properties(mediainterface_winrt PROPERTIES
     OUTPUT_NAME "mediainterface_winrt"
 )
 
-target_link_libraries(mediainterface_winrt PRIVATE windowsapp)
+# windowsapp = WinRT umbrella; windowscodecs = WIC (artwork downscale);
+# ole32 = classic COM (CoCreateInstance + CreateStreamOnHGlobal).
+target_link_libraries(mediainterface_winrt PRIVATE windowsapp windowscodecs ole32)

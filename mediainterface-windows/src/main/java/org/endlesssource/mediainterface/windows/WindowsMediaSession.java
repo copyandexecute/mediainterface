@@ -25,6 +25,7 @@ final class WindowsMediaSession implements MediaSession {
     private final String sessionId;
     private final boolean eventDrivenEnabled;
     private final boolean positionUpdatesEnabled;
+    private final int artworkMaxSize;
     private final long updateIntervalMs;
     private final WindowsMediaTransportControls controls;
     private final List<MediaSessionListener> listeners = new CopyOnWriteArrayList<>();
@@ -35,15 +36,21 @@ final class WindowsMediaSession implements MediaSession {
     private volatile String cachedAppName;
 
     private volatile PlaybackState lastPlaybackState = PlaybackState.UNKNOWN;
+    /** Last title/artist/album we fetched artwork for; null = no track. */
+    private volatile String lastArtworkIdentity;
+    /** Base64 artwork for {@link #lastArtworkIdentity}, reused across polls. */
+    private volatile String cachedArtwork;
     private volatile Snapshot lastSnapshot;
     private volatile Boolean lastActive;
     private volatile double lastPlaybackRate = 1.0d;
     private volatile long lastSnapshotMonotonicNanos = System.nanoTime();
 
-    WindowsMediaSession(String sessionId, boolean eventDrivenEnabled, Duration updateInterval, boolean positionUpdatesEnabled) {
+    WindowsMediaSession(String sessionId, boolean eventDrivenEnabled, Duration updateInterval,
+                        boolean positionUpdatesEnabled, int artworkMaxSize) {
         this.sessionId = Objects.requireNonNull(sessionId, "sessionId");
         this.eventDrivenEnabled = eventDrivenEnabled;
         this.positionUpdatesEnabled = positionUpdatesEnabled;
+        this.artworkMaxSize = artworkMaxSize;
         this.updateIntervalMs = Objects.requireNonNull(updateInterval, "updateInterval").toMillis();
         this.controls = new WindowsMediaTransportControls(sessionId);
         this.executor = Executors.newSingleThreadScheduledExecutor();
@@ -67,6 +74,17 @@ final class WindowsMediaSession implements MediaSession {
         if (payload == null || payload.length == 0) {
             return Optional.empty();
         }
+        // nativeGetNowPlaying no longer returns artwork (payload[3] is empty) so
+        // we don't re-decode + base64 the thumbnail 5x/sec. Fetch it only when the
+        // track identity changes, then reuse the cached value on subsequent polls.
+        String identity = trackIdentity(payload);
+        if (!Objects.equals(identity, lastArtworkIdentity)) {
+            lastArtworkIdentity = identity;
+            cachedArtwork = identity == null ? null : WinRtBridge.nativeGetArtwork(sessionId, artworkMaxSize);
+        }
+        if (payload.length > 3) {
+            payload[3] = cachedArtwork;
+        }
         if (!positionUpdatesEnabled && payload.length > 5) {
             payload[5] = null;
         }
@@ -75,6 +93,21 @@ final class WindowsMediaSession implements MediaSession {
             return Optional.empty();
         }
         return Optional.of(snapshot.toNowPlaying());
+    }
+
+    /** title/artist/album joined by a separator, or null when no track is present. */
+    private static String trackIdentity(String[] payload) {
+        String title = payload.length > 0 ? payload[0] : null;
+        String artist = payload.length > 1 ? payload[1] : null;
+        String album = payload.length > 2 ? payload[2] : null;
+        if (isBlank(title) && isBlank(artist) && isBlank(album)) {
+            return null;
+        }
+        return title + "\u0001" + artist + "\u0001" + album;
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     @Override

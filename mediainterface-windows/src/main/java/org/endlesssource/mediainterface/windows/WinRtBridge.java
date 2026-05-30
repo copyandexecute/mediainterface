@@ -94,6 +94,18 @@ final class WinRtBridge {
      */
     static native String[] nativeGetNowPlaying(String sessionId);
 
+    /**
+     * Reads + base64-encodes the session thumbnail. Separate from
+     * {@link #nativeGetNowPlaying(String)} so callers only pay the thumbnail
+     * decode/encode cost when the track changes, not on every poll.
+     *
+     * @param maxSize longest output edge in px; the thumbnail is downscaled to
+     *   fit (aspect preserved) and re-encoded as PNG. {@code <= 0} returns the
+     *   source thumbnail untouched. Downscale failures fall back to the source.
+     * @return base64 thumbnail bytes, or {@code null} when none is available.
+     */
+    static native String nativeGetArtwork(String sessionId, int maxSize);
+
     static native boolean nativePlay(String sessionId);
 
     static native boolean nativePause(String sessionId);
