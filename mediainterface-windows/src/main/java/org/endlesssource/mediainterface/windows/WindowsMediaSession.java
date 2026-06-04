@@ -154,12 +154,11 @@ final class WindowsMediaSession implements MediaSession {
             PlaybackState currentState = controls.refreshPlaybackState();
             controls.refreshCapabilities();
 
-            String appName = WinRtBridge.nativeGetSessionAppName(sessionId);
-            if (appName != null && !appName.trim().isEmpty()) {
-                cachedAppName = appName;
-            }
-
-            boolean active = WinRtBridge.nativeIsSessionActive(sessionId);
+            // appName == SourceAppUserModelId == sessionId (set in the constructor), so the
+            // native fetch returned the same value every poll — dropped. isActive is the same
+            // PlaybackStatus we just read in refreshPlaybackState(), so derive it instead of
+            // paying a second native GetPlaybackInfo() round-trip per poll.
+            boolean active = currentState == PlaybackState.PLAYING || currentState == PlaybackState.PAUSED;
             cachedActive = active;
 
             Optional<NowPlaying> currentNowPlaying = queryNowPlayingFromNative();
