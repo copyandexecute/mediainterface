@@ -1,0 +1,125 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.endlesssource.mediainterface",
+    "module": "windows",
+    "version": "26.2.10-dev-java-8",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.3.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "org.endlesssource.mediainterface",
+          "module": "core",
+          "version": {
+            "requires": "26.2.10-dev-java-8"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "windows-26.2.10-dev-java-8.jar",
+          "url": "windows-26.2.10-dev-java-8.jar",
+          "size": 351156,
+          "sha512": "5ff37abb49544c61add5accf8d7b250e0c919bb4451008123e674d9fec47c2f5a0954d260ca5f3bf763aff043ffda28f9d76e86dc3dc4279b518e66262f85c0c",
+          "sha256": "f33e72a2fb984c6074bc0299ccbbf665fa4e07e19bbbf369febacd2bd3823566",
+          "sha1": "57efaa9aad917b81ee4e75691f146d21017b0521",
+          "md5": "34f581564c870cf34a75e476e752eada"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.slf4j",
+          "module": "slf4j-api",
+          "version": {
+            "requires": "2.0.9"
+          }
+        },
+        {
+          "group": "org.endlesssource.mediainterface",
+          "module": "core",
+          "version": {
+            "requires": "26.2.10-dev-java-8"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "windows-26.2.10-dev-java-8.jar",
+          "url": "windows-26.2.10-dev-java-8.jar",
+          "size": 351156,
+          "sha512": "5ff37abb49544c61add5accf8d7b250e0c919bb4451008123e674d9fec47c2f5a0954d260ca5f3bf763aff043ffda28f9d76e86dc3dc4279b518e66262f85c0c",
+          "sha256": "f33e72a2fb984c6074bc0299ccbbf665fa4e07e19bbbf369febacd2bd3823566",
+          "sha1": "57efaa9aad917b81ee4e75691f146d21017b0521",
+          "md5": "34f581564c870cf34a75e476e752eada"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "windows-26.2.10-dev-java-8-sources.jar",
+          "url": "windows-26.2.10-dev-java-8-sources.jar",
+          "size": 338911,
+          "sha512": "f5e317e9773c6430f74023692857a9047bed41666b8abf3bcbfafac3e4d603bd51b835ac31f724e1b9500c57186dd9837f637235dcb8708ffe67950dbcb55511",
+          "sha256": "0f921f93bd3f06f9ec811c7f6852da070b43989aaeb020d1bdfce814e1d62e35",
+          "sha1": "9b7fc4c09a9d7ae6e5304a3ba9f67b1b4e89e767",
+          "md5": "36e0e266515f3998796bc9bef3deb3b4"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "windows-26.2.10-dev-java-8-javadoc.jar",
+          "url": "windows-26.2.10-dev-java-8-javadoc.jar",
+          "size": 84541,
+          "sha512": "a49b1df57cb6cde67b8f663fc68313208dace8850b35fde884ad6215c90fa67b66de79beec75704ac2d864e698d54668c78e95f0a5d8a2cb781d0f9d2deee410",
+          "sha256": "76f673096ed8e121a9456389b30e4e7c43aa2779fa29f1bd31f206d2ee2ddd2d",
+          "sha1": "c11912ab5c26a2506c081c28f5a4a0dfe6b73b79",
+          "md5": "08f9276c6afe32bea83f8e23aed777d5"
+        }
+      ]
+    }
+  ]
+}
