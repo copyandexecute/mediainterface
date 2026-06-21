@@ -33,7 +33,7 @@ public final class WindowsSystemMediaInterface implements SystemMediaInterface {
         this.options = options;
         WinRtBridge.load();
         WinRtBridge.nativeInit(options.isEventDrivenEnabled());
-        this.executor = options.isEventDrivenEnabled() ? Executors.newScheduledThreadPool(2) : null;
+        this.executor = options.isEventDrivenEnabled() ? Executors.newScheduledThreadPool(2, r -> { Thread t = new Thread(r, "mediainterface-sessions"); t.setDaemon(true); return t; }) : null;
         logger.debug("Initializing Windows media interface (eventDriven={})", options.isEventDrivenEnabled());
         discoverSessions();
         if (options.isEventDrivenEnabled()) {

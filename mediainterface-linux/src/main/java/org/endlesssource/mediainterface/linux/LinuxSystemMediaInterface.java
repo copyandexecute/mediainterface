@@ -44,7 +44,7 @@ public class LinuxSystemMediaInterface implements SystemMediaInterface {
         this.options = options;
         this.connection = DBusConnectionBuilder.forSessionBus().build();
         this.executor = options.isEventDrivenEnabled()
-                ? Executors.newScheduledThreadPool(2)
+                ? Executors.newScheduledThreadPool(2, r -> { Thread t = new Thread(r, "mediainterface-sessions"); t.setDaemon(true); return t; })
                 : null;
         discoverSessions();
         if (options.isEventDrivenEnabled()) {

@@ -53,7 +53,7 @@ final class WindowsMediaSession implements MediaSession {
         this.artworkMaxSize = artworkMaxSize;
         this.updateIntervalMs = Objects.requireNonNull(updateInterval, "updateInterval").toMillis();
         this.controls = new WindowsMediaTransportControls(sessionId);
-        this.executor = Executors.newSingleThreadScheduledExecutor();
+        this.executor = Executors.newSingleThreadScheduledExecutor(r -> { Thread t = new Thread(r, "mediainterface-session"); t.setDaemon(true); return t; });
         this.cachedAppName = sessionId;
         // Warm cache immediately so first reads/listener registration see current state.
         checkForChanges();
