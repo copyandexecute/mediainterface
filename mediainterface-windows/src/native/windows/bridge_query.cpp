@@ -102,8 +102,9 @@ Java_org_endlesssource_mediainterface_windows_WinRtBridge_nativeGetSessionIds(JN
         trace_native(env, "nativeGetSessionIds requesting manager");
         auto manager = request_manager_safe(env);
         if (!manager.has_value()) {
+            // null = transient failure (Java keeps sessions); empty[] = genuine zero set.
             trace_native(env, "nativeGetSessionIds manager unavailable");
-            return new_string_array(env, {});
+            return nullptr;
         }
         std::vector<std::string> ids;
         std::unordered_set<std::string> seen;
@@ -119,11 +120,14 @@ Java_org_endlesssource_mediainterface_windows_WinRtBridge_nativeGetSessionIds(JN
         trace_native(env, std::string("nativeGetSessionIds count=") + std::to_string(ids.size()));
         return new_string_array(env, ids);
     } catch (const hresult_error& e) {
+        // drop stale cache; null (not empty[]) so Java keeps sessions on a transient error
+        invalidate_manager_cache();
         trace_hresult(env, "nativeGetSessionIds", e);
-        return new_string_array(env, {});
+        return nullptr;
     } catch (...) {
+        invalidate_manager_cache();
         trace_native(env, "nativeGetSessionIds unknown exception");
-        return new_string_array(env, {});
+        return nullptr;
     }
 }
 
