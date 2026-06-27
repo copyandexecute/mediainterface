@@ -7,11 +7,17 @@ val isWindows = System.getProperty("os.name").lowercase().contains("win")
 dependencies {
     api(project(":mediainterface-core"))
     implementation("org.slf4j:slf4j-api:2.0.9")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 val nativeWindowsDir = layout.projectDirectory.dir("src/native/windows")
