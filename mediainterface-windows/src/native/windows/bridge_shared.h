@@ -9,6 +9,7 @@
 #include <winrt/Windows.Security.Cryptography.h>
 #include <winrt/Windows.Storage.Streams.h>
 
+#include <chrono>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -20,11 +21,22 @@ using namespace Windows::Media::Control;
 using namespace Windows::Security::Cryptography;
 using namespace Windows::Storage::Streams;
 
+inline constexpr std::chrono::milliseconds kAsyncTimeout{2000};
+
+// A native .get() can't be interrupted by Java shutdownNow(); without a timeout a hung
+// cross-process call leaks the calling thread. On timeout: cancel + throw → caller's catch.
+template <typename TOp>
+auto await_with_timeout(TOp const& op, std::chrono::milliseconds timeout = kAsyncTimeout) {
+    if (op.wait_for(timeout) != winrt::Windows::Foundation::AsyncStatus::Completed) {
+        op.Cancel();
+        throw winrt::hresult_error(HRESULT_FROM_WIN32(ERROR_TIMEOUT), L"WinRT async timed out");
+    }
+    return op.GetResults();
+}
+
 extern bool g_eventDriven;
 extern std::mutex g_initMutex;
 extern int g_initRefCount;
-extern bool g_apartmentInitializedByBridge;
-extern std::thread::id g_apartmentInitThread;
 
 extern std::mutex g_traceMutex;
 extern jclass g_bridgeClassGlobal;

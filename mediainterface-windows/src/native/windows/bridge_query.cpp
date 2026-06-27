@@ -254,7 +254,7 @@ Java_org_endlesssource_mediainterface_windows_WinRtBridge_nativeGetNowPlaying(JN
         }
 
         trace_native(env, "nativeGetNowPlaying fetching media properties");
-        auto mediaProps = session.value().TryGetMediaPropertiesAsync().get();
+        auto mediaProps = await_with_timeout(session.value().TryGetMediaPropertiesAsync(), kAsyncTimeout);
         payload[0] = to_string(mediaProps.Title());
         payload[1] = to_string(mediaProps.Artist());
         payload[2] = to_string(mediaProps.AlbumTitle());
@@ -364,20 +364,20 @@ Java_org_endlesssource_mediainterface_windows_WinRtBridge_nativeGetArtwork(JNIEn
             trace_native(env, "nativeGetArtwork no session");
             return nullptr;
         }
-        auto mediaProps = session.value().TryGetMediaPropertiesAsync().get();
+        auto mediaProps = await_with_timeout(session.value().TryGetMediaPropertiesAsync(), kAsyncTimeout);
         auto thumbnail = mediaProps.Thumbnail();
         if (!thumbnail) {
             trace_native(env, "nativeGetArtwork no thumbnail");
             return nullptr;
         }
-        auto stream = thumbnail.OpenReadAsync().get();
+        auto stream = await_with_timeout(thumbnail.OpenReadAsync(), kAsyncTimeout);
         uint32_t size = static_cast<uint32_t>(std::min<uint64_t>(stream.Size(), static_cast<uint64_t>(5 * 1024 * 1024)));
         if (size == 0) {
             trace_native(env, "nativeGetArtwork empty stream");
             return nullptr;
         }
         trace_native(env, std::string("nativeGetArtwork reading thumbnail size=") + std::to_string(size));
-        auto buffer = stream.ReadAsync(Buffer(size), size, InputStreamOptions::None).get();
+        auto buffer = await_with_timeout(stream.ReadAsync(Buffer(size), size, InputStreamOptions::None), kAsyncTimeout);
 
         // Downscale before base64 so we don't ship a full-res cover for a
         // sprite that renders ~128px. Any WIC failure falls back to source bytes.
