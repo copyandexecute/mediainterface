@@ -9,11 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
@@ -23,8 +21,13 @@ import java.util.concurrent.TimeUnit;
 public final class WindowsSystemMediaInterface implements SystemMediaInterface {
     private static final Logger logger = LoggerFactory.getLogger(WindowsSystemMediaInterface.class);
 
+    /** Consecutive absent polls before a session is removed — rides out transient WinRT gaps. */
+    private static final int MISS_THRESHOLD_BEFORE_REMOVE = 3;
+
     private final SystemMediaOptions options;
     private final Map<String, WindowsMediaSession> sessions = new ConcurrentHashMap<>();
+    /** Single poll thread only. */
+    private final SessionReconciler reconciler = new SessionReconciler(MISS_THRESHOLD_BEFORE_REMOVE);
     private final List<MediaSessionListener> listeners = new CopyOnWriteArrayList<>();
     private final ScheduledExecutorService executor;
     private volatile boolean closed;
@@ -102,6 +105,7 @@ public final class WindowsSystemMediaInterface implements SystemMediaInterface {
         }
         sessions.values().forEach(WindowsMediaSession::close);
         sessions.clear();
+        reconciler.clear();
         listeners.clear();
         WinRtBridge.nativeShutdown();
         logger.debug("Windows media interface closed");
@@ -124,23 +128,11 @@ public final class WindowsSystemMediaInterface implements SystemMediaInterface {
             return;
         }
         String[] ids = WinRtBridge.nativeGetSessionIds();
-        if (ids == null) {
-            return;
+        SessionReconciler.Decision decision = reconciler.reconcile(sessions.keySet(), ids);
+        for (String id : decision.toAdd()) {
+            addSession(id);
         }
-        Set<String> current = new HashSet<>();
-        for (String id : ids) {
-            if (id == null || id.trim().isEmpty()) {
-                continue;
-            }
-            current.add(id);
-            if (!sessions.containsKey(id)) {
-                addSession(id);
-            }
-        }
-
-        Set<String> removed = new HashSet<>(sessions.keySet());
-        removed.removeAll(current);
-        for (String id : removed) {
+        for (String id : decision.toRemove()) {
             removeSession(id);
         }
     }
@@ -162,6 +154,7 @@ public final class WindowsSystemMediaInterface implements SystemMediaInterface {
     }
 
     private void removeSession(String id) {
+        reconciler.forget(id);
         WindowsMediaSession removed = sessions.remove(id);
         if (removed != null) {
             removed.close();
