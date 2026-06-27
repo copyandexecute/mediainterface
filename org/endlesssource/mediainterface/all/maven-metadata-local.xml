@@ -3,11 +3,11 @@
   <groupId>org.endlesssource.mediainterface</groupId>
   <artifactId>all</artifactId>
   <versioning>
-    <latest>26.2.10-dev-java-8</latest>
-    <release>26.2.10-dev-java-8</release>
+    <latest>26.2.15-dev-java-8</latest>
+    <release>26.2.15-dev-java-8</release>
     <versions>
-      <version>26.2.10-dev-java-8</version>
+      <version>26.2.15-dev-java-8</version>
     </versions>
-    <lastUpdated>20260621150230</lastUpdated>
+    <lastUpdated>20260627070841</lastUpdated>
   </versioning>
 </metadata>

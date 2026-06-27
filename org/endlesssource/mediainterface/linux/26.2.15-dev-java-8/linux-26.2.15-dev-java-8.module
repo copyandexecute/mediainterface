@@ -1,0 +1,153 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.endlesssource.mediainterface",
+    "module": "linux",
+    "version": "26.2.15-dev-java-8",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.3.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "org.endlesssource.mediainterface",
+          "module": "core",
+          "version": {
+            "requires": "26.2.15-dev-java-8"
+          }
+        },
+        {
+          "group": "com.github.hypfvieh",
+          "module": "dbus-java-core",
+          "version": {
+            "requires": "4.3.1"
+          }
+        },
+        {
+          "group": "com.github.hypfvieh",
+          "module": "dbus-java-transport-native-unixsocket",
+          "version": {
+            "requires": "4.3.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "linux-26.2.15-dev-java-8.jar",
+          "url": "linux-26.2.15-dev-java-8.jar",
+          "size": 28700,
+          "sha512": "4f0fe4b2ca9baba86fcc3fee13755542fa24b5bb319f11d687261a9957326136f08d91701a54d62b33ba78d60472d3e76ced5aa4602a02dc7f85ccdd46c12f5a",
+          "sha256": "61f87c3609185cf7c2fe8139494cdf3c342ae6b667d989d8d1dcf09a0ffa2f73",
+          "sha1": "d529c47374005f4fec434d4016df9a3f2e3b4a2c",
+          "md5": "cbf8a3f9b775166f71f054b5f699640f"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.slf4j",
+          "module": "slf4j-api",
+          "version": {
+            "requires": "2.0.9"
+          }
+        },
+        {
+          "group": "org.endlesssource.mediainterface",
+          "module": "core",
+          "version": {
+            "requires": "26.2.15-dev-java-8"
+          }
+        },
+        {
+          "group": "com.github.hypfvieh",
+          "module": "dbus-java-core",
+          "version": {
+            "requires": "4.3.1"
+          }
+        },
+        {
+          "group": "com.github.hypfvieh",
+          "module": "dbus-java-transport-native-unixsocket",
+          "version": {
+            "requires": "4.3.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "linux-26.2.15-dev-java-8.jar",
+          "url": "linux-26.2.15-dev-java-8.jar",
+          "size": 28700,
+          "sha512": "4f0fe4b2ca9baba86fcc3fee13755542fa24b5bb319f11d687261a9957326136f08d91701a54d62b33ba78d60472d3e76ced5aa4602a02dc7f85ccdd46c12f5a",
+          "sha256": "61f87c3609185cf7c2fe8139494cdf3c342ae6b667d989d8d1dcf09a0ffa2f73",
+          "sha1": "d529c47374005f4fec434d4016df9a3f2e3b4a2c",
+          "md5": "cbf8a3f9b775166f71f054b5f699640f"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "linux-26.2.15-dev-java-8-sources.jar",
+          "url": "linux-26.2.15-dev-java-8-sources.jar",
+          "size": 13310,
+          "sha512": "fb68b27904e44c832d85a3b57bfea765ceae8069bd49a1fd8099c9139e659c7ed0ee7fdfe8e9d0ccdbb6f0472fa3377687c84147565dc4aabd8288840887d387",
+          "sha256": "818154f2d92fdd7b4e63a7c54388e4cc7f456a5bf26b620c7dcb37fa8bd329b9",
+          "sha1": "d87d2ee3d59da2946a85f3377a193e78a6f6e43e",
+          "md5": "980224de66f2d1e789d521c94fcc68ea"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "linux-26.2.15-dev-java-8-javadoc.jar",
+          "url": "linux-26.2.15-dev-java-8-javadoc.jar",
+          "size": 84708,
+          "sha512": "91db28bea7fd8035feafee66db8a122a241fe1503191418af436d752c4895d6368e7299cca404f81585192934f8a43f4c40e8df928c1abeebb96ef414a159f57",
+          "sha256": "7d53cfc7ae82640fe63bef013ece94c3621957d1f77575da6854883cb75373c9",
+          "sha1": "59f0fb6e91313c94b2da167b36bb545287acad7f",
+          "md5": "442e817045ce1e8170a5233f488b7b7f"
+        }
+      ]
+    }
+  ]
+}
