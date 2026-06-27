@@ -46,5 +46,11 @@ int64_t millis_to_ticks(int64_t millis);
 bool smtc_try_request_manager(GlobalSystemMediaTransportControlsSessionManager* out, JNIEnv* env) noexcept;
 
 // Wraps smtc_try_request_manager with up to 3 retries for cold-boot AVs.
+// The successfully-obtained manager is cached and reused on subsequent calls;
+// invalidate_manager_cache() drops it so the next call re-requests.
 std::optional<GlobalSystemMediaTransportControlsSessionManager> request_manager_safe(JNIEnv* env);
+
+// Drops the cached SMTC manager (call when a WinRT op on it fails, or before
+// uninit_apartment so the COM ref doesn't outlive the apartment).
+void invalidate_manager_cache();
 std::optional<GlobalSystemMediaTransportControlsSession> find_session(const std::string& sessionId, JNIEnv* env = nullptr);

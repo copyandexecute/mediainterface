@@ -9,8 +9,6 @@
 bool g_eventDriven = true;
 std::mutex g_initMutex;
 int g_initRefCount = 0;
-bool g_apartmentInitializedByBridge = false;
-std::thread::id g_apartmentInitThread;
 
 std::mutex g_traceMutex;
 jclass g_bridgeClassGlobal = nullptr;
@@ -131,11 +129,36 @@ int64_t millis_to_ticks(int64_t millis) {
 // the factory stays accessible and we skip the thread-based slow path.
 static std::atomic<bool> g_factory_warm{false};
 
+// The SMTC manager is a long-lived live object: GetSessions() on it always
+// reflects the current set of sessions. Requesting a fresh one on every native
+// call (RequestAsync().get() per playbackState/capabilities/nowPlaying poll,
+// per session, per second) hammered the WinRT activation broker and leaked
+// OS-side handles over multi-hour sessions. Request once, cache, reuse.
+static std::mutex g_managerMutex;
+static std::optional<GlobalSystemMediaTransportControlsSessionManager> g_cachedManager;
+
+void invalidate_manager_cache() {
+    std::lock_guard<std::mutex> lock(g_managerMutex);
+    g_cachedManager.reset();
+}
+
 std::optional<GlobalSystemMediaTransportControlsSessionManager> request_manager_safe(JNIEnv* env) {
-    // Fast path: factory already warmed up, call directly.
+    // Cache hit: hand back a copy (COM AddRef — cheap, safe from any MTA thread).
+    {
+        std::lock_guard<std::mutex> lock(g_managerMutex);
+        if (g_cachedManager.has_value()) {
+            return g_cachedManager;
+        }
+    }
+
+    // Fast path: factory already warmed up, request directly (cache was
+    // invalidated after a failure — re-request and re-cache).
     if (g_factory_warm.load(std::memory_order_acquire)) {
         try {
-            return GlobalSystemMediaTransportControlsSessionManager::RequestAsync().get();
+            auto manager = GlobalSystemMediaTransportControlsSessionManager::RequestAsync().get();
+            std::lock_guard<std::mutex> lock(g_managerMutex);
+            g_cachedManager = manager;
+            return g_cachedManager;
         } catch (...) {
             return std::nullopt;
         }
@@ -155,7 +178,9 @@ std::optional<GlobalSystemMediaTransportControlsSessionManager> request_manager_
         if (smtc_try_request_manager(&manager, env)) {
             g_factory_warm.store(true, std::memory_order_release);
             trace_native(env, "request_manager_safe: factory warmed, success");
-            return manager;
+            std::lock_guard<std::mutex> lock(g_managerMutex);
+            g_cachedManager = manager;
+            return g_cachedManager;
         }
         trace_native(env, std::string("request_manager_safe: failed attempt=") + std::to_string(attempt));
     }
@@ -170,11 +195,19 @@ std::optional<GlobalSystemMediaTransportControlsSession> find_session(const std:
         trace_native(env, "find_session: manager unavailable");
         return std::nullopt;
     }
-    for (auto const& session : manager.value().GetSessions()) {
-        if (to_string(session.SourceAppUserModelId()) == sessionId) {
-            trace_native(env, std::string("find_session hit id=") + sessionId);
-            return session;
+    try {
+        for (auto const& session : manager.value().GetSessions()) {
+            if (to_string(session.SourceAppUserModelId()) == sessionId) {
+                trace_native(env, std::string("find_session hit id=") + sessionId);
+                return session;
+            }
         }
+    } catch (...) {
+        // Cached manager went stale (session-manager restart, user logoff, ...).
+        // Drop it so the next call re-requests a fresh one.
+        invalidate_manager_cache();
+        trace_native(env, "find_session: GetSessions threw, invalidated manager cache");
+        return std::nullopt;
     }
     trace_native(env, std::string("find_session miss id=") + sessionId);
     return std::nullopt;
